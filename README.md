@@ -1,6 +1,13 @@
 # Vuitton
 
-Package vuitton checks product availability via the [official Louis Vuitton website](https://en.louisvuitton.com).
+Vuitton checks product availability via the [official Louis Vuitton website](https://en.louisvuitton.com).
+
+Vuitton is a convenient, platform-independent, zero-installation, zero-configuration product monitor for
+the command line. Precompiled binaries are provided for Mac OSX, Windows and Linux.
+
+While not guaranteed to work with every product from the Louis Vuitton website, it has been tested with a variety
+of products, including bags and shoes. For shoes, it can track stock availability for specific shoe sizes, as long
+as the URL contains adequate information (more information below). 
 
 _Note:_ This package is provided _as-is_. It's a personal project foremost, and although it works perfectly with the
 current version of Louis Vuitton's API, it is not guaranteed to do so at all times. Use at your own risk.
@@ -93,5 +100,15 @@ Editing the P-file, simply add a hash symbol, `#`, followed by the SKU code. In 
 this already when you copy/paste it.
 
 During availability checks, the algorithm will look for this particular SKU and provide more accurate results.
+
+## Notifications
+
+Currently, the monitor will open a product URL in your default browser when it comes in stock, and send a desktop
+notification. Either of these notification types can be disabled via the command-line flags.
+
+## Finally...
+
+If you found this application useful, give me a star on GitHub to show your appreciation.
+You can also give me a mention on [Twitter](https://twitter.com/MartinKock).
 
 Enjoy!
