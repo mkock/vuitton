@@ -14,8 +14,9 @@ import (
 
 // stockLevel keeps track of stock levels across reloads.
 type stockLevel struct {
-	product product
-	inStock bool
+	product   product
+	inStock   bool
+	updatedAt time.Time
 }
 
 // MainLoop is the loop that has a dual purpose:
@@ -61,19 +62,33 @@ func (m *MainLoop) Run() error {
 			output("No products to monitor, please update your products text file")
 			return
 		}
-		// Update products.
 		m.Lock()
-		var pID string
-		for _, p := range ps {
-			pID = p.productID()
-			if pID == "" {
-				output("Failed to determine product ID for one of the URL's, does it include a product code?")
-				continue
+		{
+			// Update products.
+			var pID string
+			var pCached stockLevel
+			var ok bool
+			for _, p := range ps {
+				pID = p.productID()
+				if pID == "" {
+					output("Failed to determine product ID for one of the URL's, does it include a product code?")
+					continue
+				}
+				pCached, ok = m.products[pID]
+				if ok {
+					pCached.updatedAt = lastRead
+				} else {
+					m.products[pID] = stockLevel{
+						product:   p,
+						inStock:   false,
+						updatedAt: lastRead,
+					}
+				}
 			}
-			if _, ok := m.products[pID]; !ok {
-				m.products[pID] = stockLevel{
-					product: p,
-					inStock: false,
+			// Un-cache removed products (they will have updatedAt < lastRead).
+			for pID, pCached = range m.products {
+				if pCached.updatedAt.Before(lastRead) {
+					delete(m.products, pID)
 				}
 			}
 		}

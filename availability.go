@@ -11,12 +11,14 @@ import (
 // lvURL is the URL that provides product availability on Louis Vuitton's API. Needs a country code and a product ID.
 const lvURL = "https://api.louisvuitton.com/api/%s/catalog/availability/%s"
 
+// avail describes the product availability for a single product, identified by its SKUID.
 type avail struct {
 	SKUID   string `json:"skuId"`
 	Exists  bool   `json:"exists"`
 	InStock bool   `json:"inStock"`
 }
 
+// response describes the part of the API response that we wish to process.
 type response struct {
 	SKUAvailability []avail `json:"skuAvailability"`
 }
