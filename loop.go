@@ -10,6 +10,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/atomicgo/cursor"
 )
 
 // stockLevel keeps track of stock levels across reloads.
@@ -23,6 +25,7 @@ type stockLevel struct {
 // 1. Reload the products_sample.txt file when it changes
 // 2. Periodically check product availability
 type MainLoop struct {
+	ViewPort             *cursor.Area
 	Country              Country
 	AvailabilityInterval time.Duration
 	RequestTimeout       time.Duration
@@ -32,8 +35,9 @@ type MainLoop struct {
 	Notification         func(title, msg string)
 	OpenBrowser          bool
 
-	sync.Mutex // Protects the field(s) below.
-	products   map[string]stockLevel
+	sync.Mutex                       // Protects the field(s) below.
+	products   map[string]stockLevel // Key is product ID, value is stockLevel.
+	message    string
 }
 
 // Run starts the main loop. Run does not exit until interrupted by a SIGINT, or if an unrecoverable error occurs.
@@ -55,28 +59,30 @@ func (m *MainLoop) Run() error {
 		lastRead = time.Now()
 		ps, err := m.ReadPFile()
 		if err != nil {
-			output(err.Error())
+			m.output(err.Error())
 			return
 		}
 		if len(ps) == 0 {
-			output("No products to monitor, please update your products text file")
+			m.output("No products to monitor, please update your products text file")
 			return
 		}
 		m.Lock()
 		{
 			// Update products.
+			m.message = ""
 			var pID string
 			var pCached stockLevel
 			var ok bool
 			for _, p := range ps {
 				pID = p.productID()
 				if pID == "" {
-					output("Failed to determine product ID for one of the URL's, does it include a product code?")
+					m.output("Failed to determine product ID for one of the URL's, does it include a product code?")
 					continue
 				}
 				pCached, ok = m.products[pID]
 				if ok {
 					pCached.updatedAt = lastRead
+					m.products[pID] = pCached
 				} else {
 					m.products[pID] = stockLevel{
 						product:   p,
@@ -93,28 +99,29 @@ func (m *MainLoop) Run() error {
 			}
 		}
 		m.Unlock()
-		output(fmt.Sprintf("Reloaded %d products", len(ps)))
+		m.updateView()
 	}
 
 	// Set up availability checks.
 	availTicker := time.NewTicker(m.AvailabilityInterval)
 	availFunc := func() {
 		m.Lock()
+		defer m.updateView()
 		defer m.Unlock()
+
+		m.message = ""
 		if len(m.products) == 0 {
 			return
 		}
 		// Perform availability checks.
 		// TODO: We keep the lock during availability checks, this can be improved.
-		output("Checking product availability")
 		for pID, lvl := range m.products {
 			inStock, err := m.availability(lvl.product)
 			if err != nil {
-				output(err.Error())
+				m.message = fmt.Sprintf("Unable to check availability of %q: %s", pID, err.Error())
 				continue
 			}
 			if inStock && !lvl.inStock {
-				output(fmt.Sprintf("Product %q seems to be in stock!", pID))
 				if m.Notification != nil {
 					m.Notification("Vuitton Monitor", fmt.Sprintf("Product %q is in stock!", pID))
 				}
@@ -127,10 +134,6 @@ func (m *MainLoop) Run() error {
 		}
 	}
 
-	// Intro.
-	output(fmt.Sprintf("Region: %s", m.Country.Code()))
-	output(fmt.Sprintf("Products file: %s", m.PFileName))
-
 	// Load products once before entering the loop.
 	pFileFunc()
 
@@ -138,7 +141,10 @@ func (m *MainLoop) Run() error {
 	for {
 		select {
 		case <-sigs:
-			fmt.Println(" Bye")
+			m.Lock()
+			m.message = "Bye!"
+			m.Unlock()
+			m.updateView()
 			return nil // TODO(mkock) Proper shutdown!
 		case <-availTicker.C:
 			go availFunc()

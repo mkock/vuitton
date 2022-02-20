@@ -82,7 +82,7 @@ Product availability varies by country.
 
 The default country is Denmark (DK). You may pick another via the command line flags. Supported countries are:
 
-BE, DE, DK, ES, FI, FR, IE, IT, LU, MC, NL, AT, SE, UK, RU, US, BR, CA, MX, CN, JP, KR, HK, SG, TW, TH, AU, NZ, UAE, AE, SA, KW, KW, QA
+BE, DE, DK, ES, FI, FR, IE, IT, LU, MC, NL, AT, SE, UK, RU, US, BR, CA, MX, CN, JP, KR, HK, SG, TW, TH, AU, NZ, UA, AE, SA, KW, KW, QA
 
 Check the available shipping countries on the [Louis Vuitton website](https://en.louisvuitton.com/) for reference.
 
@@ -105,6 +105,11 @@ During availability checks, the algorithm will look for this particular SKU and 
 
 Currently, the monitor will open a product URL in your default browser when it comes in stock, and send a desktop
 notification. Either of these notification types can be disabled via the command-line flags.
+
+## Intervals
+
+When changing any of the intervals via the command line, you can use abbreviations such as "10s" (10 seconds),
+"2m" (2 minutes) and so forth.
 
 ## Finally...
 

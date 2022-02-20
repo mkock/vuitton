@@ -9,8 +9,11 @@ import (
 	"time"
 	"vuitton"
 
+	"github.com/atomicgo/cursor"
 	"github.com/gen2brain/beeep"
 )
+
+const minIntervalsSeconds = 2
 
 var (
 	pFileName            string
@@ -52,12 +55,34 @@ func main() {
 	// Validate country.
 	country := vuitton.Country(countryCode)
 	if !country.Valid() {
-		fmt.Println("Invalid country. Acceptable values are: BE, DE, DK, ES, FI, FR, IE, IT, LU, MC, NL, AT, SE, UK, RU, US, BR, CA, MX, CN, JP, KR, HK, SG, TW, TH, AU, NZ, UA, AE, SA, KW, KW, QA")
-		exitCode = 1
-		os.Exit(exitCode)
+		msg := fmt.Sprintln("Invalid country. Acceptable values are: BE, DE, DK, ES, FI, FR, IE, IT, LU, MC, NL, AT, SE, UK, RU, US, BR, CA, MX, CN, JP, KR, HK, SG, TW, TH, AU, NZ, UA, AE, SA, KW, KW, QA")
+		printErrorUsageAndExit(1, msg)
 	}
 
+	// Validate durations.
+	if availabilityInterval.Seconds() < minIntervalsSeconds {
+		msg := fmt.Sprintf("Invalid duration for availability interval, must be at least %d seconds\n", minIntervalsSeconds)
+		printErrorUsageAndExit(2, msg)
+	}
+	if pFileInterval.Seconds() < minIntervalsSeconds {
+		msg := fmt.Sprintf("Invalid duration for p-file interval, must be at least %d seconds\n", minIntervalsSeconds)
+		printErrorUsageAndExit(3, msg)
+	}
+
+	// Check if p-file exists.
+	info, err := os.Stat(pFileName)
+	if err != nil {
+		msg := "Unable to read p-file, please create one, make sure it's readable and then use the 'filename' argument to point to the file's location\n"
+		printErrorUsageAndExit(4, msg)
+	}
+	if !info.Mode().IsRegular() {
+		msg := "p-file does not look like it's a regular text file\n"
+		printErrorUsageAndExit(5, msg)
+	}
+
+	view := cursor.NewArea()
 	m := vuitton.MainLoop{
+		ViewPort:             &view,
 		Country:              country,
 		AvailabilityInterval: availabilityInterval,
 		RequestTimeout:       5 * time.Second,
@@ -67,10 +92,16 @@ func main() {
 		Notification:         desktopNotification,
 		PFileInterval:        pFileInterval,
 	}
-	err := m.Run()
+	err = m.Run()
 	if err != nil {
 		fmt.Println("Error:", err.Error())
-		exitCode = 2
+		exitCode = 6
 	}
+	os.Exit(exitCode)
+}
+
+func printErrorUsageAndExit(exitCode int, msg string) {
+	fmt.Println("Error:", msg)
+	flag.Usage()
 	os.Exit(exitCode)
 }
