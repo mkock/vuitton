@@ -40,7 +40,7 @@ func (m *MainLoop) availability(p product) (inStock bool, err error) {
 	}
 	setCommonHeaders(req)
 	req.Header.Add("origin", p.Domain())
-	req.Header.Add("referer", p.Domain())
+	req.Header.Add("referer", p.URL)
 
 	resp, err := c.Do(req)
 	if err != nil {
