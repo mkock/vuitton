@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// psMax is the maximum number of products we are willing to track.
-const psMax = 10
+// psMax is the maximum number of products that we are willing to track.
+const psMax = 15
 
 var errMaxExceeded = errors.New("too many products being tracked")
 
