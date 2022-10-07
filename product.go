@@ -1,6 +1,7 @@
 package vuitton
 
 import (
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -12,12 +13,12 @@ type product struct {
 	URL string
 }
 
-// Valid returns true if the product URL looks valid, ie. points to louisvuitton.com and contains a product ID.
+// Valid returns true if the product URL looks valid, ie. points to louisvuitton.com and looks like a product URL.
 func (p product) Valid() bool {
 	if p.URL == "" ||
 		!strings.HasPrefix(p.URL, "https://") ||
 		!strings.Contains(p.URL, "louisvuitton") ||
-		!strings.Contains(p.URL, "nvprod") {
+		!strings.Contains(p.URL, "products") {
 		return false
 	}
 	return true
@@ -42,10 +43,27 @@ func (p product) Domain() string {
 func (p product) productID() string {
 	// Example URL: https://en.louisvuitton.com/eng-nl/products/ecorce-rousse-perfumed-candle-nvprod1910068v.
 	// Result: nvprod1910068v.
+	// This must also work: https://en.louisvuitton.com/eng-nl/products/pochette-accessoires-monogram-005656.
+	// Result: 005656.
 	if !p.Valid() {
 		return ""
 	}
-	return productRegExp.FindString(p.URL)
+	match := productRegExp.FindString(p.URL)
+	if match != "" {
+		return match
+	}
+	// No nvprod ID, so let's look for a number.
+	u, err := url.Parse(p.URL)
+	if err == nil {
+		parts := strings.Split(u.Path, "/")
+		for i := range parts {
+			if parts[i] == "products" && i < len(parts) && strings.Contains(parts[i+1], "-") {
+				fields := strings.Split(parts[i+1], "-")
+				return fields[len(fields)-1]
+			}
+		}
+	}
+	return ""
 }
 
 // SKU returns the SKU for the product identified by its URL.

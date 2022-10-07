@@ -3,7 +3,7 @@
 Vuitton checks product availability via the [official Louis Vuitton website](https://en.louisvuitton.com).
 
 Vuitton is a convenient, platform-independent, zero-installation, zero-configuration product monitor for
-the command line. Precompiled binaries are provided for Mac OSX, Windows and Linux.
+the command line. Pre-compiled binaries are provided for Mac OSX, Windows and Linux.
 
 While not guaranteed to work with every product from the Louis Vuitton website, it has been tested with a variety
 of products, including bags and shoes. For shoes, it can track stock availability for specific shoe sizes, as long
@@ -46,7 +46,7 @@ See command line flags (`./vuitton -help`) for how to change these.
    2. If not, then `git clone` should do it
 2. Install
    1. Run `go build -o vuitton cmd/main.go` (assuming Linux - always build to your platform) 
-   2. You can also run the binaries available in the `bins` directory
+   2. You can also run the binaries available in GitHub's releases overview
 3. Use
    1. From the command line, first create an empty "products.txt" file; you can use another name but then you'll need to use a flag to tell the application which name you are using.
    2. Find the products you want to monitor, on the [Louis Vuitton website](https://en.louisvuitton.com/)

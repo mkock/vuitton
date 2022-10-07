@@ -13,11 +13,12 @@ func TestValid(t *testing.T) {
 		{"hello", false},
 		{"https://www.google.com", false},
 		{"http://en.louisvuitton.com/eng-nl/products/", false},
-		{"https://en.louisvuitton.com/eng-nl/products/", false},
+		{"https://en.louisvuitton.com/eng-nl/products/", true},
 		{"https://us.louisvuitton.com/eng-nl/products/loop-bag-monogram-nvprod3190103v?country=DK", true},
 		{"https://jp.louisvuitton.com/eng-nl/products/trio-messenger-bag-damier-graphite-nvprod3430073v", true},
 		{"https://en.louisvuitton.com/eng-nl/products/croisillon-shawl-nvprod3390166v#M77459", true},
 		{"https://en.louisvuitton.com/eng-nl/products/ecorce-rousse-perfumed-candle-nvprod1910068v", true},
+		{"https://en.louisvuitton.com/eng-nl/products/pochette-accessoires-monogram-005656", true},
 	}
 
 	var valid bool
@@ -36,11 +37,12 @@ func TestDomain(t *testing.T) {
 	}{
 		{"", ""},
 		{"hello", ""},
-		{"https://en.louisvuitton.com/eng-nl/products/", ""},
+		{"https://en.louisvuitton.com/eng-nl/products/", "https://en.louisvuitton.com"},
 		{"https://us.louisvuitton.com/eng-nl/products/loop-bag-monogram-nvprod3190103v?country=DK", "https://us.louisvuitton.com"},
 		{"https://jp.louisvuitton.com/eng-nl/products/trio-messenger-bag-damier-graphite-nvprod3430073v", "https://jp.louisvuitton.com"},
 		{"https://en.louisvuitton.com/eng-nl/products/croisillon-shawl-nvprod3390166v#M77459", "https://en.louisvuitton.com"},
 		{"https://en.louisvuitton.com/eng-nl/products/ecorce-rousse-perfumed-candle-nvprod1910068v", "https://en.louisvuitton.com"},
+		{"https://en.louisvuitton.com/eng-nl/products/pochette-accessoires-monogram-005656", "https://en.louisvuitton.com"},
 	}
 
 	var actual string
@@ -64,6 +66,7 @@ func TestProductID(t *testing.T) {
 		{"https://jp.louisvuitton.com/eng-nl/products/trio-messenger-bag-damier-graphite-nvprod3430073v", "nvprod3430073v"},
 		{"https://en.louisvuitton.com/eng-nl/products/croisillon-shawl-nvprod3390166v#M77459", "nvprod3390166v"},
 		{"https://en.louisvuitton.com/eng-nl/products/ecorce-rousse-perfumed-candle-nvprod1910068v", "nvprod1910068v"},
+		{"https://en.louisvuitton.com/eng-nl/products/pochette-accessoires-monogram-005656", "005656"},
 	}
 
 	var actual string
@@ -89,6 +92,7 @@ func TestSKU(t *testing.T) {
 		{"https://en.louisvuitton.com/eng-nl/products/charlie-trainers-nvprod3130266v#	1A9JNC ", "1A9JNC"},
 		{"https://en.louisvuitton.com/eng-nl/products/ecorce-rousse-perfumed-candle-nvprod1910068v#", ""},
 		{"https://en.louisvuitton.com/eng-nl/products/ecorce-rousse-perfumed-candle-nvprod1910068v# ", ""},
+		{"https://en.louisvuitton.com/eng-nl/products/pochette-accessoires-monogram-005656", ""},
 	}
 
 	var actual string
